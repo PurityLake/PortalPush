@@ -52,6 +52,8 @@ function love.keypressed(k)
         if k == "r" then
             map = Map.new(level)
             time_spent = 0.0
+        elseif k == "q" then
+            love.event.quit()
         end
         return
     end
