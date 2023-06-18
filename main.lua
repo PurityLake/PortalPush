@@ -5,6 +5,8 @@ local window_height = 600
 
 local time_spent = 0
 
+local level = "assets/maps/test.map"
+
 function draw_timer()
     local minutes = math.floor(time_spent / 60)
     local seconds = math.floor(time_spent % 60)
@@ -12,6 +14,12 @@ function draw_timer()
     local time_string = string.format("%02d:%02d:%02d", minutes, seconds, milliseconds)
     love.graphics.setColor(255, 255, 255)
     love.graphics.print(time_string, 450, 50)
+end
+
+function draw_win()
+    love.graphics.setColor(0, 255, 255)
+    love.graphics.print("YOU WON!", 450, 100)
+    love.graphics.print("R to restart", 450, 160)
 end
 
 function love.load()
@@ -22,15 +30,14 @@ function love.load()
     })
     love.window.setTitle("Sokoban Love")
     love.graphics.setNewFont(50)
-    map = Map.new("assets/maps/test.map")
+    map = Map.new(level)
 end
 
 function love.draw()
     map:draw(window_width / 2, window_height / 2)
     draw_timer()
     if map.game_won then
-        love.graphics.setColor(0, 255, 255)
-        love.graphics.print("YOU WON!", 450, 100)
+        draw_win()
     end
 end
 
@@ -42,6 +49,10 @@ end
 
 function love.keypressed(k)
     if map.game_won then
+        if k == "r" then
+            map = Map.new(level)
+            time_spent = 0.0
+        end
         return
     end
 
