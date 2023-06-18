@@ -4,6 +4,7 @@ local window_width = 800
 local window_height = 600
 
 local time_spent = 0
+local moves = 0
 
 local level = "assets/maps/test.map"
 
@@ -16,10 +17,21 @@ function draw_timer()
     love.graphics.print(time_string, 450, 50)
 end
 
+function draw_moves()
+    love.graphics.setColor(255, 255, 255)
+    love.graphics.print("Moves: " .. moves, 450, 100)
+end
+
 function draw_win()
     love.graphics.setColor(0, 255, 255)
-    love.graphics.print("YOU WON!", 450, 100)
-    love.graphics.print("R to restart", 450, 160)
+    love.graphics.print("YOU WON!", 450, 150)
+    love.graphics.print("R to restart", 450, 200)
+end
+
+function reset_level()
+    map = Map.new(level)
+    time_spent = 0.0
+    moves = 0
 end
 
 function love.load()
@@ -36,6 +48,7 @@ end
 function love.draw()
     map:draw(window_width / 2, window_height / 2)
     draw_timer()
+    draw_moves()
     if map.game_won then
         draw_win()
     end
@@ -50,8 +63,7 @@ end
 function love.keypressed(k)
     if map.game_won then
         if k == "r" then
-            map = Map.new(level)
-            time_spent = 0.0
+            reset_level()
         elseif k == "q" then
             love.event.quit()
         end
@@ -59,12 +71,12 @@ function love.keypressed(k)
     end
 
     if k == "up" then
-        map:move_player(0, -1)
+        moves = moves + map:move_player(0, -1)
     elseif k == "down" then
-        map:move_player(0, 1)
+        moves = moves + map:move_player(0, 1)
     elseif k == "left" then
-        map:move_player(-1, 0)
+        moves = moves + map:move_player(-1, 0)
     elseif k == "right" then
-        map:move_player(1, 0)
+        moves = moves + map:move_player(1, 0)
     end
 end

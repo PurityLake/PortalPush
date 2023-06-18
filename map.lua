@@ -89,6 +89,7 @@ function Map.new(filename)
     local y = 1
     self.box_positions = {}
     self.goal_positions = {}
+    self.correct_box_positions = {}
     self.tiles = {}
     for line in file:lines() do
         self.tiles[y] = {}
@@ -179,7 +180,9 @@ function Map:move_player(dx, dy)
         self.player_pos.x = new_x
         self.player_pos.y = new_y
         self:update_objects()
+        return 1
     end
+    return 0
 end
 
 function is_in_table(table, pos)
