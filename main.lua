@@ -16,7 +16,10 @@ end
 
 function love.load()
     math.randomseed(os.time())
-    love.window.setMode(window_width, window_height, {resizable=false, vsync=false})
+    love.window.setMode(window_width, window_height, {
+        resizable = false,
+        vsync = false
+    })
     love.window.setTitle("Sokoban Love")
     love.graphics.setNewFont(50)
     map = Map.new("assets/maps/test.map")
