@@ -25,6 +25,9 @@ BlockTile = 3
 PlayerTile = 4
 GoalTile = 5
 
+local rx = 10
+local ry = 10
+
 function Tile.new(x, y, type)
     local self = setmetatable({}, {
         __index = Tile
@@ -133,7 +136,7 @@ function Map:draw(width, height)
         for x = 1, self.width do
             if x == self.player_pos.x and y == self.player_pos.y then
                 love.graphics.setColor(0, 255, 0)
-                love.graphics.rectangle("fill", x * tile_width, y * tile_height, tile_width, tile_height)
+                love.graphics.rectangle("fill", x * tile_width, y * tile_height, tile_width, tile_height, rx, ry)
             else
                 self.tiles[y][x]:draw(x, y, tile_width, tile_height)
             end
@@ -142,17 +145,17 @@ function Map:draw(width, height)
 
     for _, value in pairs(self.box_positions) do
         love.graphics.setColor(255, 0, 0)
-        love.graphics.rectangle("fill", value.x * tile_width, value.y * tile_height, tile_width, tile_height)
+        love.graphics.rectangle("fill", value.x * tile_width, value.y * tile_height, tile_width, tile_height, rx, ry)
     end
 
     for _, value in pairs(self.goal_positions) do
         love.graphics.setColor(0, 0, 255)
-        love.graphics.rectangle("fill", value.x * tile_width, value.y * tile_height, tile_width, tile_height)
+        love.graphics.rectangle("fill", value.x * tile_width, value.y * tile_height, tile_width, tile_height, rx, ry)
     end
 
     for _, value in pairs(self.correct_box_positions) do
         love.graphics.setColor(255, 0, 255)
-        love.graphics.rectangle("fill", value.x * tile_width, value.y * tile_height, tile_width, tile_height)
+        love.graphics.rectangle("fill", value.x * tile_width, value.y * tile_height, tile_width, tile_height, rx, ry)
     end
 end
 
