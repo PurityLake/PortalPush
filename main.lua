@@ -1,4 +1,4 @@
-local Map = require("libc.map").Map
+local Map = require("lib.map").Map
 
 local window_width = 800
 local window_height = 600
@@ -6,7 +6,7 @@ local window_height = 600
 local time_spent = 0
 local moves = 0
 
-local level = "assets/maps/test.map"
+local level = "assets/maps/test.map.lua"
 
 local map = {}
 

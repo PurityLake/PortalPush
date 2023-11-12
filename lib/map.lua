@@ -1,7 +1,6 @@
 ---@diagnostic disable: duplicate-set-field
 ---@diagnostic disable-next-line: different-requires
-local Util = require("./lib/util")
-local Xml = require("./lib/xmlparser")
+local Util = require("lib.util")
 
 Map = {
     width = 0,
@@ -27,6 +26,22 @@ WallTile = 2
 BlockTile = 3
 PlayerTile = 4
 GoalTile = 5
+
+local function strToTileId(s)
+    if s == "empty" then
+        return EmptyTile
+    elseif s == "wall" then
+        return WallTile
+    elseif s == "block" then
+        return BlockTile
+    elseif s == "player" then
+        return PlayerTile
+    elseif s == "goal" then
+        return GoalTile
+    else
+        return -1
+    end
+end
 
 local rx = 10
 local ry = 10
@@ -75,52 +90,36 @@ function Map.new(filename)
         __index = Map
     })
 
-    local file = assert(io.open(filename, "r"))
-    local magic = file:read("*line")
+    local m, err = love.filesystem.load(filename)
+    local map_file = m()
+    local name = map_file.name
+    self.width = map_file.width
+    self.height = map_file.height
 
-    assert(magic == "SOKOBAN", "Invalid map file")
-
-    local dims = Util.str_split(file:read("*line"), ",")
-    assert(#dims == 2, "Invalid map file dimensions, expected w,h")
-
-    local width = dims[1]
-    local height = dims[2]
-
-    self.width = tonumber(width)
-    self.height = tonumber(height)
-
-    local y = 1
-    self.box_positions = {}
-    self.goal_positions = {}
-    self.correct_box_positions = {}
-    self.tiles = {}
-    for line in file:lines() do
+    for y, row in ipairs(map_file["rows"]) do
         self.tiles[y] = {}
-        for x = 1, #line do
-            local tile = Tile.new(x, y, tonumber(line:sub(x, x)))
-            if tile.type == PlayerTile then
+        for x, col in ipairs(row) do
+            local t = strToTileId(col.type)
+            self.tiles[y][x] = Tile.new(x, y, t)
+            if t == PlayerTile then
                 self.player_pos = {
                     x = x,
                     y = y
                 }
-                tile.type = EmptyTile
-            elseif tile.type == GoalTile then
+            elseif t == GoalTile then
                 table.insert(self.goal_positions, {
                     x = x,
                     y = y
                 })
-                tile.type = EmptyTile
-            elseif tile.type == BlockTile then
+            elseif t == BlockTile then
                 table.insert(self.box_positions, {
                     x = x,
                     y = y
                 })
-                tile.type = EmptyTile
             end
-            self.tiles[y][x] = tile
         end
-        y = y + 1
     end
+
     return self
 end
 
@@ -188,7 +187,7 @@ function Map:move_player(dx, dy)
     return 0
 end
 
-function is_in_table(table, pos)
+local function is_in_table(table, pos)
     for i, value in pairs(table) do
         if value.x == pos.x and value.y == pos.y then
             return i, true
@@ -202,7 +201,7 @@ function Map:update_objects()
     for bi, value in pairs(self.box_positions) do
         local gi, is_in = is_in_table(self.goal_positions, value)
         if is_in then
-            table.insert(indexes, {bi, gi})
+            table.insert(indexes, { bi, gi })
             table.insert(self.correct_box_positions, value)
         else
             value.type = BlockTile
