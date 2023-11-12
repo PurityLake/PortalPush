@@ -53,10 +53,10 @@ return {
         },
         [5] = {
             { type = "wall",  color = "0xFFFFFF" },
+            { type = "empty", color = "0x000000" },
+            { type = "empty", color = "0x000000" },
             { type = "goal",  color = "0x0000FF" },
-            { type = "empty", color = "0x000000" },
-            { type = "empty", color = "0x000000" },
-            { type = "empty", color = "0x000000" },
+            { type = "block", color = "0x000000" },
             { type = "empty", color = "0x000000" },
             { type = "empty", color = "0x000000" },
             { type = "empty", color = "0x000000" },

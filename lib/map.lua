@@ -11,7 +11,6 @@ Map = {
     },
     box_positions = {},
     goal_positions = {},
-    correct_box_positions = {},
     tiles = {},
     game_won = false
 }
@@ -95,8 +94,10 @@ function Map.new(filename)
     local name = map_file.name
     self.width = map_file.width
     self.height = map_file.height
+    self.goal_positions = {}
+    self.box_positions = {}
 
-    for y, row in ipairs(map_file["rows"]) do
+    for y, row in ipairs(map_file.rows) do
         self.tiles[y] = {}
         for x, col in ipairs(row) do
             local t = strToTileId(col.type)
