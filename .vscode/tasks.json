@@ -12,6 +12,18 @@
                 "kind": "build",
                 "isDefault": false
             }
+        },
+        {
+            "label": "love2d: build",
+            "type": "process",
+            "command": "./compile.ps1",
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            }
         }
     ]
 }
