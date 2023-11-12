@@ -42,7 +42,6 @@ function love.load()
         resizable = false,
         vsync = false
     })
-    love.window.setTitle("Portal Push")
     love.graphics.setNewFont(50)
     map = Map.new(level)
 end
