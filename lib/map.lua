@@ -11,6 +11,7 @@ Map = {
     },
     box_positions = {},
     goal_positions = {},
+    correct_box_positions = {},
     tiles = {},
     game_won = false
 }
@@ -96,6 +97,7 @@ function Map.new(filename)
     self.height = map_file.height
     self.goal_positions = {}
     self.box_positions = {}
+    self.correct_box_positions = {}
 
     for y, row in ipairs(map_file.rows) do
         self.tiles[y] = {}
@@ -213,7 +215,7 @@ function Map:update_objects()
         end
     end
 
-    for _, value in pairs(indexes) do
+    for _, value in ipairs(indexes) do
         table.remove(self.box_positions, value[1])
         table.remove(self.goal_positions, value[2])
     end
