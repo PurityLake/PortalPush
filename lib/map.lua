@@ -100,23 +100,27 @@ function Map.new(filename)
         self.tiles[y] = {}
         for x, col in ipairs(row) do
             local t = strToTileId(col.type)
-            self.tiles[y][x] = Tile.new(x, y, t)
+            local tile = Tile.new(x, y, t)
             if t == PlayerTile then
                 self.player_pos = {
                     x = x,
                     y = y
                 }
+                t = EmptyTile
             elseif t == GoalTile then
                 table.insert(self.goal_positions, {
                     x = x,
                     y = y
                 })
+                t = EmptyTile
             elseif t == BlockTile then
                 table.insert(self.box_positions, {
                     x = x,
                     y = y
                 })
+                t = EmptyTile
             end
+            self.tiles[y][x] = Tile.new(x, y, t)
         end
     end
 
