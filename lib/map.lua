@@ -1,6 +1,7 @@
 ---@diagnostic disable: duplicate-set-field
 ---@diagnostic disable-next-line: different-requires
 local Util = require("./lib/util")
+local Xml = require("./lib/xmlparser")
 
 Map = {
     width = 0,
