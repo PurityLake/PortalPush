@@ -1,4 +1,4 @@
-local Map = require("map").Map
+local Map = require("./lib/map").Map
 
 local window_width = 800
 local window_height = 600
@@ -40,7 +40,7 @@ function love.load()
         resizable = false,
         vsync = false
     })
-    love.window.setTitle("Sokoban Love")
+    love.window.setTitle("Portal Push")
     love.graphics.setNewFont(50)
     map = Map.new(level)
 end
