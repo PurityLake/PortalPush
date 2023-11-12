@@ -1,4 +1,4 @@
-local Map = require("./lib/map").Map
+local Map = require("libc.map").Map
 
 local window_width = 800
 local window_height = 600
@@ -8,7 +8,9 @@ local moves = 0
 
 local level = "assets/maps/test.map"
 
-function draw_timer()
+local map = {}
+
+local function draw_timer()
     local minutes = math.floor(time_spent / 60)
     local seconds = math.floor(time_spent % 60)
     local milliseconds = math.floor((time_spent * 100) % 100)
@@ -17,18 +19,18 @@ function draw_timer()
     love.graphics.print(time_string, 450, 50)
 end
 
-function draw_moves()
+local function draw_moves()
     love.graphics.setColor(255, 255, 255)
     love.graphics.print("Moves: " .. moves, 450, 100)
 end
 
-function draw_win()
+local function draw_win()
     love.graphics.setColor(0, 255, 255)
     love.graphics.print("YOU WON!", 450, 150)
     love.graphics.print("R to restart", 450, 200)
 end
 
-function reset_level()
+local function reset_level()
     map = Map.new(level)
     time_spent = 0.0
     moves = 0
