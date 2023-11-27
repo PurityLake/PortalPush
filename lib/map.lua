@@ -1,20 +1,21 @@
 ---@diagnostic disable: duplicate-set-field
 ---@diagnostic disable-next-line: different-requires
 local Util = require("lib.util")
+local Player = require("lib.player")
 
 Map = {
     width = 0,
     height = 0,
-    player_pos = {
-        x = 0,
-        y = 0
-    },
+    tile_width = 0,
+    tile_height = 0,
+    player = Player.new(),
     box_positions = {},
     goal_positions = {},
     correct_box_positions = {},
     tiles = {},
     game_won = false
 }
+
 Tile = {
     x = 0,
     y = 0,
@@ -105,10 +106,7 @@ function Map.new(filename)
             local t = strToTileId(col.type)
             local tile = Tile.new(x, y, t)
             if t == PlayerTile then
-                self.player_pos = {
-                    x = x,
-                    y = y
-                }
+                self.player = Player.new(x, y)
                 t = EmptyTile
             elseif t == GoalTile then
                 table.insert(self.goal_positions, {
@@ -138,20 +136,34 @@ function Map:height()
     return self.height
 end
 
+function Map:update(dt)
+    local new_pos = self.player:update(dt)
+    if new_pos ~= nil then
+        self.player.pos = new_pos
+    end
+end
+
 function Map:draw(width, height)
     local ratio = width / height
     local tile_width = width / self.width
     local tile_height = height / self.height * ratio
+    if self.tile_width ~= tile_width then
+        self.tile_width = tile_width
+    end
+    if self.tile_height ~= tile_height then
+        self.tile_height = tile_height
+    end
     for y = 1, self.height do
         for x = 1, self.width do
-            if x == self.player_pos.x and y == self.player_pos.y then
-                love.graphics.setColor(0, 255, 0)
-                love.graphics.rectangle("fill", x * tile_width, y * tile_height, tile_width, tile_height, rx, ry)
-            else
-                self.tiles[y][x]:draw(x, y, tile_width, tile_height)
-            end
+            self.tiles[y][x]:draw(x, y, tile_width, tile_height)
         end
     end
+
+    local player_pos = self.player:get_pos()
+
+    love.graphics.setColor(0, 255, 0)
+    love.graphics.rectangle("fill", player_pos.x * tile_width, player_pos.y * tile_height, tile_width, tile_height, rx,
+        ry)
 
     for _, value in pairs(self.box_positions) do
         love.graphics.setColor(255, 0, 0)
@@ -170,26 +182,27 @@ function Map:draw(width, height)
 end
 
 function Map:move_player(dx, dy)
-    local new_x = self.player_pos.x + dx
-    local new_y = self.player_pos.y + dy
+    if not self.player:is_moving() then
+        local new_x = self.player.pos.x + dx
+        local new_y = self.player.pos.y + dy
 
-    for _, value in pairs(self.box_positions) do
-        if value.x == new_x and value.y == new_y then
-            if self.tiles[new_y + dy][new_x + dx]:is_empty() then
-                value.x = new_x + dx
-                value.y = new_y + dy
-                break
-            else
-                return
+        for _, value in pairs(self.box_positions) do
+            if value.x == new_x and value.y == new_y then
+                if self.tiles[new_y + dy][new_x + dx]:is_empty() then
+                    value.x = new_x + dx
+                    value.y = new_y + dy
+                    break
+                else
+                    return
+                end
             end
         end
-    end
 
-    if self.tiles[new_y][new_x]:is_empty() then
-        self.player_pos.x = new_x
-        self.player_pos.y = new_y
-        self:update_objects()
-        return 1
+        if self.tiles[new_y][new_x]:is_empty() then
+            self.player:move(dx, dy)
+            self:update_objects()
+            return 1
+        end
     end
     return 0
 end
