@@ -134,9 +134,7 @@ function Map:height()
 end
 
 function Map:update(dt)
-    local should_update = false
-
-    should_update = self.player:update(dt)
+    local should_update = self.player:update(dt)
     for i, box in ipairs(self.boxes) do
         should_update = should_update or box:update(dt)
     end
