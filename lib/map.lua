@@ -136,7 +136,11 @@ end
 function Map:update(dt)
     local should_update = self.player:update(dt)
     for i, box in ipairs(self.boxes) do
-        should_update = should_update or box:update(dt)
+        if should_update then
+            box:update(dt)
+        else
+            should_update = box:update(dt)
+        end
     end
 
     if should_update then
@@ -203,7 +207,6 @@ function Map:move_player(dx, dy)
 
         if self.tiles[new_y][new_x]:is_empty() then
             self.player:move(dx, dy)
-            self:update_objects()
             return 1
         end
     end
@@ -222,10 +225,10 @@ end
 function Map:update_objects()
     local indexes = {}
     for bi, value in pairs(self.boxes) do
-        local gi, is_in = is_in_table(self.goals, value)
+        local gi, is_in = is_in_table(self.goals, value.pos)
         if is_in then
             table.insert(indexes, { bi, gi })
-            table.insert(self.correct_boxes, value)
+            table.insert(self.correct_boxes, value.pos)
         else
             value.type = BlockTile
         end

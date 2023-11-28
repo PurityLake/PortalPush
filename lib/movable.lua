@@ -18,8 +18,9 @@ end
 function Movable:update(dt)
     if self.tween:update(dt) then
         self.pos = self.tween.vec_end
+        return true
     end
-    return nil
+    return false
 end
 
 function Movable:move(dx, dy)

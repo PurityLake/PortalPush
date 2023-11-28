@@ -25,7 +25,7 @@ end
 
 function Tween:update(dt)
     self.elasped = self.elasped + dt
-    return self.elasped < self.duration
+    return self.elasped >= self.duration
 end
 
 function Tween:is_complete()
