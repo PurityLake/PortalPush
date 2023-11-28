@@ -59,6 +59,7 @@ function love.update(dt)
     if not map.game_won then
         time_spent = time_spent + dt
     end
+    map:update(dt)
 end
 
 function love.keypressed(k)

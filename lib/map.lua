@@ -1,17 +1,17 @@
 ---@diagnostic disable: duplicate-set-field
 ---@diagnostic disable-next-line: different-requires
 local Util = require("lib.util")
-local Player = require("lib.player")
+local Movable = require("lib.movable")
 
 Map = {
     width = 0,
     height = 0,
     tile_width = 0,
     tile_height = 0,
-    player = Player.new(),
-    box_positions = {},
-    goal_positions = {},
-    correct_box_positions = {},
+    player = Movable.new(0, 0),
+    boxes = {},
+    goals = {},
+    correct_boxes = {},
     tiles = {},
     game_won = false
 }
@@ -96,9 +96,9 @@ function Map.new(filename)
     local name = map_file.name
     self.width = map_file.width
     self.height = map_file.height
-    self.goal_positions = {}
-    self.box_positions = {}
-    self.correct_box_positions = {}
+    self.goals = {}
+    self.boxes = {}
+    self.correct_boxes = {}
 
     for y, row in ipairs(map_file.rows) do
         self.tiles[y] = {}
@@ -106,19 +106,16 @@ function Map.new(filename)
             local t = strToTileId(col.type)
             local tile = Tile.new(x, y, t)
             if t == PlayerTile then
-                self.player = Player.new(x, y)
+                self.player = Movable.new(x, y)
                 t = EmptyTile
             elseif t == GoalTile then
-                table.insert(self.goal_positions, {
+                table.insert(self.goals, {
                     x = x,
                     y = y
                 })
                 t = EmptyTile
             elseif t == BlockTile then
-                table.insert(self.box_positions, {
-                    x = x,
-                    y = y
-                })
+                table.insert(self.boxes, Movable.new(x, y))
                 t = EmptyTile
             end
             self.tiles[y][x] = Tile.new(x, y, t)
@@ -137,9 +134,15 @@ function Map:height()
 end
 
 function Map:update(dt)
-    local new_pos = self.player:update(dt)
-    if new_pos ~= nil then
-        self.player.pos = new_pos
+    local should_update = false
+
+    should_update = self.player:update(dt)
+    for i, box in ipairs(self.boxes) do
+        should_update = should_update or box:update(dt)
+    end
+
+    if should_update then
+        self:update_objects()
     end
 end
 
@@ -147,12 +150,14 @@ function Map:draw(width, height)
     local ratio = width / height
     local tile_width = width / self.width
     local tile_height = height / self.height * ratio
+
     if self.tile_width ~= tile_width then
         self.tile_width = tile_width
     end
     if self.tile_height ~= tile_height then
         self.tile_height = tile_height
     end
+
     for y = 1, self.height do
         for x = 1, self.width do
             self.tiles[y][x]:draw(x, y, tile_width, tile_height)
@@ -165,17 +170,18 @@ function Map:draw(width, height)
     love.graphics.rectangle("fill", player_pos.x * tile_width, player_pos.y * tile_height, tile_width, tile_height, rx,
         ry)
 
-    for _, value in pairs(self.box_positions) do
+    for _, value in pairs(self.boxes) do
+        local pos = value:get_pos()
         love.graphics.setColor(255, 0, 0)
-        love.graphics.rectangle("fill", value.x * tile_width, value.y * tile_height, tile_width, tile_height, rx, ry)
+        love.graphics.rectangle("fill", pos.x * tile_width, pos.y * tile_height, tile_width, tile_height, rx, ry)
     end
 
-    for _, value in pairs(self.goal_positions) do
+    for _, value in pairs(self.goals) do
         love.graphics.setColor(0, 0, 255)
         love.graphics.rectangle("fill", value.x * tile_width, value.y * tile_height, tile_width, tile_height, rx, ry)
     end
 
-    for _, value in pairs(self.correct_box_positions) do
+    for _, value in pairs(self.correct_boxes) do
         love.graphics.setColor(255, 0, 255)
         love.graphics.rectangle("fill", value.x * tile_width, value.y * tile_height, tile_width, tile_height, rx, ry)
     end
@@ -186,11 +192,10 @@ function Map:move_player(dx, dy)
         local new_x = self.player.pos.x + dx
         local new_y = self.player.pos.y + dy
 
-        for _, value in pairs(self.box_positions) do
-            if value.x == new_x and value.y == new_y then
+        for _, value in pairs(self.boxes) do
+            if value.pos.x == new_x and value.pos.y == new_y then
                 if self.tiles[new_y + dy][new_x + dx]:is_empty() then
-                    value.x = new_x + dx
-                    value.y = new_y + dy
+                    value.tween = Tween.new(value.pos, Vector.new(value.pos.x + dx, value.pos.y + dy), 0.75)
                     break
                 else
                     return
@@ -218,22 +223,22 @@ end
 
 function Map:update_objects()
     local indexes = {}
-    for bi, value in pairs(self.box_positions) do
-        local gi, is_in = is_in_table(self.goal_positions, value)
+    for bi, value in pairs(self.boxes) do
+        local gi, is_in = is_in_table(self.goals, value)
         if is_in then
             table.insert(indexes, { bi, gi })
-            table.insert(self.correct_box_positions, value)
+            table.insert(self.correct_boxes, value)
         else
             value.type = BlockTile
         end
     end
 
     for _, value in ipairs(indexes) do
-        table.remove(self.box_positions, value[1])
-        table.remove(self.goal_positions, value[2])
+        table.remove(self.boxes, value[1])
+        table.remove(self.goals, value[2])
     end
 
-    if #self.goal_positions == 0 then
+    if #self.goals == 0 then
         self.game_won = true
     end
 end
