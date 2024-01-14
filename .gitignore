@@ -1,6 +1,7 @@
 *.love
-
+PortalPush
 build/
+
 # Compiled Lua sources
 luac.out
 
